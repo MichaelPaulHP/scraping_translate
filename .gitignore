@@ -6,3 +6,4 @@ ghostdriver.log
 env/
 venv/Lib
 ENV/
+__pycache__
