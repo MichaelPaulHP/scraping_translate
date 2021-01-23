@@ -1,18 +1,19 @@
 import curses
 from curses import textpad
 
+from models.Listener import Listener
 from ui.GoogleTranslatePrinter import GoogleTranslatePrinter
 from ui.Position import Position
 from ui.Size import Size
 from view_model.TranslatorVM import TranslatorVM
 
 
-class MyConsole:
+class MyConsole(Listener):
     def __init__(self):
-        self.translator_print = GoogleTranslatePrinter()
-        self.vm = TranslatorVM()
+        self.vm = TranslatorVM(self)
         self.windows_one = None
         self.windows_two = None
+        self.window_status = None
         self.windows = None
         self.state = "ready"
         self.sh = 0
@@ -20,34 +21,37 @@ class MyConsole:
 
     def show_main(self, stdscr):
         self.windows = stdscr
+        self.windows.nodelay(False)
         curses.curs_set(1)
-        stdscr.nodelay(1)
+
         self.sh, self.sw = stdscr.getmaxyx()
         self.start_color()
         self.print_options()
         self.print_state(state="Ready")
 
-        text = None
         text = self.print_input_box(stdscr)
         self.create_win_result(stdscr)
         self.print_state(state="Loading")
         while True:
             try:
                 if self.is_valid_text(text):
-                    self.print_state(state="I find " + text[:10])
-                    # google_translate = do_scraping(text)
-                    self.print_state(state="I Found " + text[:10])
+                    # self.print_state(state="I find " + text[:10])
 
-                    # print_principal_result(stdscr, google_translate)
+                    self.vm.do_scraping(text)
+                    translate_printer = GoogleTranslatePrinter(self.vm)
+
+                    translate_printer.print_principal_result(self.windows)
                     stdscr.refresh()
-
-                    # print_translations(two, google_translate)
-                    # print_definitions(one, google_translate)
-
+                    translate_printer.print_translations(self.windows_two)
+                    translate_printer.print_definitions(self.windows_one)
+                    self.refresh_results()
                     curses.curs_set(0)
-
+                else:
+                    self.print_state("Please input ")
                 curses.curs_set(0)
                 key = stdscr.getch()
+                if key == -1:
+                    self.print_state("no input")
                 if key == ord('q'):
                     break
                 if key == ord('t'):
@@ -57,6 +61,12 @@ class MyConsole:
 
             except curses.error:
                 pass
+
+    def on_message(self, message: str):
+        self.print_state(message)
+
+    def on_error(self, message: str):
+        self.print_state(message)
 
     def is_valid_text(self, text):
         return text is not None and len(text) >= 2
@@ -78,18 +88,22 @@ class MyConsole:
 
     def print_state(self, state):
         self.state = state
-        sh, sw = self.windows.getmaxyx()
-        self.windows.addstr(sh - 1, 10, "                           ")
-        self.windows.addstr(sh - 1, 10, self.state)
+        sh, sw = self.window_status.getmaxyx()
+        self.window_status.addstr(0, 10, "                           ")
+        self.window_status.addstr(0, 10, self.state)
+        self.window_status.refresh()
 
     def print_options(self):
         sh, sw = self.windows.getmaxyx()
         keys = {"key": "q", "option": "exit"}
-
-        self.windows.addstr(sh - 1, sw - 20, " t ", curses.color_pair(1))
-        self.windows.addstr(sh - 1, sw - 16, "New translation")
-        self.windows.addstr(sh - 1, sw - 40, " q ", curses.color_pair(1))
-        self.windows.addstr(sh - 1, sw - 36, "Exit")
+        self.window_status = curses.newwin(1, sw - 3, sh - 1, 1)
+        sh, sw = self.window_status.getmaxyx()
+        self.window_status.addstr(0, sw - 20, " t ", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 16, "New translation")
+        self.window_status.addstr(0, sw - 40, " q ", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 36, "Exit")
+        self.windows.refresh()
+        self.window_status.refresh()
 
     def my_raw_input(self, stdscr, pos: Position, prompt_string, prev_text) -> str:
         curses.echo()

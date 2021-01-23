@@ -4,22 +4,24 @@ from models.GoogleTranslate import GoogleTranslate
 
 
 class GoogleTranslatePrinter:
-    def print_definitions(self, window, google: GoogleTranslate):
-        definitions = google.definitions
+    def __init__(self, vm):
+        self.vm = vm
+
+    def print_definitions(self, window):
+        definitions = self.vm.definitions()
         if definitions is not None:
             for definition in definitions:
                 window.addstr("\n" + str(definition.type) + "\n", curses.color_pair(1))
                 window.addstr(str(definition))
 
-    def print_principal_result(self, windows, google_translate):
+    def print_principal_result(self, windows):
         sh, sw = windows.getmaxyx()
-        oy, ox = windows.getbegyx()
-        result = google_translate.principal
+        result = self.vm.principal_result()
         windows.addstr(4, int(sw / 2) + 5, result, curses.color_pair(1))
 
-    def print_translations(self, window, google: GoogleTranslate):
+    def print_translations(self, window):
         h, w = window.getmaxyx()
-        translations = google.get_translations()
+        translations = self.vm.translations()
         if translations is not None:
             for type in translations:
                 window.addstr("\n" + str(type.title), curses.color_pair(1))

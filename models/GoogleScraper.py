@@ -1,9 +1,12 @@
 from models.GoogleTranslate import GoogleTranslate
+from models.Listener import Listener
 from models.TranslationScraper import TranslationScraper
 from models.definitions.DefinitionsScraper import DefinitionScraper
 
 
 class GoogleScraper:
+    listener: Listener = None
+
     def scraping(self, text: str) -> GoogleTranslate:
         from bs4 import BeautifulSoup
         from selenium import webdriver
@@ -16,19 +19,20 @@ class GoogleScraper:
         url = "https://translate.google.com/?sl=en&tl=es&op=translate&text=" + text
         browser = webdriver.PhantomJS()
         browser.get(url)
+        self.listener.on_message("I am scraping")
         delay = 2  # seconds
         try:
             myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'Dwvecf')))
-            print("Page is ready!")
-            print(myElem)
+            self.listener.on_message("Page is ready")
+
         except TimeoutException:
-            print("Loading took too much time!")
+            self.listener.on_error("Loading took too much time!")
 
         html = browser.page_source
         soup = BeautifulSoup(html)
 
         a = soup.find_all('div', class_="Dwvecf")
-        print(len(a))
+
         googleTranslate = GoogleTranslate()
         # soup.find_all("div",clashs_="J0lOec") first and last
         principal = soup.find_all("span", class_="VIiyi")
@@ -36,13 +40,17 @@ class GoogleScraper:
         principal = list(map(lambda t: t.split("|")[0], principal))
 
         googleTranslate.principal = ", ".join(principal)
+        if len(principal) > 1:
+            self.listener.on_message("I found results")
         for index in range(len(a)):
             option = a[index]
             title = option.h3.get_text()
             if "Translations" in title:
                 translation = TranslationScraper.scraping(a[index])
                 googleTranslate.translations = translation
+                self.listener.on_message("I found Translations")
             if "Definitions" in title:
                 definitions = DefinitionScraper.scraping(a[index])
                 googleTranslate.definitions = definitions
+                self.listener.on_message("I found Definitions")
         return googleTranslate
