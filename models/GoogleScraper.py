@@ -2,24 +2,24 @@ from models.GoogleTranslate import GoogleTranslate
 from models.Listener import Listener
 from models.TranslationScraper import TranslationScraper
 from models.definitions.DefinitionsScraper import DefinitionScraper
+from bs4 import BeautifulSoup
+from selenium import webdriver
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 
 
 class GoogleScraper:
     listener: Listener = None
 
     def scraping(self, text: str) -> GoogleTranslate:
-        from bs4 import BeautifulSoup
-        from selenium import webdriver
-
-        from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.support import expected_conditions as EC
-        from selenium.webdriver.common.by import By
-        from selenium.common.exceptions import TimeoutException
 
         url = "https://translate.google.com/?sl=en&tl=es&op=translate&text=" + text
         browser = webdriver.PhantomJS()
-        browser.get(url)
         self.listener.on_message("I am scraping")
+        browser.get(url)
         delay = 2  # seconds
         try:
             myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'Dwvecf')))

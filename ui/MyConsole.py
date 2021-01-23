@@ -18,6 +18,7 @@ class MyConsole(Listener):
         self.state = "ready"
         self.sh = 0
         self.sw = 0
+        self.prev_text = " "
 
     def show_main(self, stdscr):
         self.windows = stdscr
@@ -36,7 +37,7 @@ class MyConsole(Listener):
             try:
                 if self.is_valid_text(text):
                     # self.print_state(state="I find " + text[:10])
-
+                    self.clear_results()
                     self.vm.do_scraping(text)
                     translate_printer = GoogleTranslatePrinter(self.vm)
 
@@ -45,6 +46,7 @@ class MyConsole(Listener):
                     translate_printer.print_translations(self.windows_two)
                     translate_printer.print_definitions(self.windows_one)
                     self.refresh_results()
+                    self.prev_text = text
                     curses.curs_set(0)
                 else:
                     self.print_state("Please input ")
@@ -68,8 +70,16 @@ class MyConsole(Listener):
     def on_error(self, message: str):
         self.print_state(message)
 
-    def is_valid_text(self, text):
-        return text is not None and len(text) >= 2
+    def is_valid_text(self, text: str):
+        if text is not None:
+            text = text.strip()
+            return len(text) >= 2 and self.prev_text != text
+        return False
+
+    def clear_results(self):
+        if self.windows_one is not None and self.windows_two is not None:
+            self.windows_one.clear()
+            self.windows_two.clear()
 
     def refresh_results(self):
         if self.windows_one is not None and self.windows_two is not None:
@@ -99,7 +109,7 @@ class MyConsole(Listener):
         keys = {"key": "q", "option": "exit"}
         self.window_status = curses.newwin(1, sw - 3, sh - 1, 1)
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, 1,  (sw-10) * " ", curses.color_pair(1))
+        self.window_status.addstr(0, 1, (sw - 10) * " ", curses.color_pair(1))
         self.window_status.addstr(0, sw - 20, " t:", curses.color_pair(1))
         self.window_status.addstr(0, sw - 16, "New translation", curses.color_pair(1))
         self.window_status.addstr(0, sw - 40, " q:", curses.color_pair(1))
