@@ -1,0 +1,7 @@
+beautifulsoup4==4.9.3
+bs4==0.0.1
+selenium==3.141.0
+soupsieve==2.1
+urllib3==1.26.2
+wcwidth==0.2.5
+windows-curses==2.2.0
