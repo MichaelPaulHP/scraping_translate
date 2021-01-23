@@ -85,12 +85,13 @@ class MyConsole(Listener):
 
         curses.start_color()
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+        curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
 
     def print_state(self, state):
         self.state = state
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, 10, "                           ")
-        self.window_status.addstr(0, 10, self.state)
+        self.window_status.addstr(0, 10, "                           ", curses.color_pair(1))
+        self.window_status.addstr(0, 10, self.state, curses.color_pair(1))
         self.window_status.refresh()
 
     def print_options(self):
@@ -98,10 +99,11 @@ class MyConsole(Listener):
         keys = {"key": "q", "option": "exit"}
         self.window_status = curses.newwin(1, sw - 3, sh - 1, 1)
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, sw - 20, " t ", curses.color_pair(1))
-        self.window_status.addstr(0, sw - 16, "New translation")
-        self.window_status.addstr(0, sw - 40, " q ", curses.color_pair(1))
-        self.window_status.addstr(0, sw - 36, "Exit")
+        self.window_status.addstr(0, 1,  (sw-10) * " ", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 20, " t:", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 16, "New translation", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 40, " q:", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 36, "Exit", curses.color_pair(1))
         self.windows.refresh()
         self.window_status.refresh()
 
@@ -111,7 +113,7 @@ class MyConsole(Listener):
         stdscr.addstr(pos.y, pos.x, prompt_string)
         # stdscr.move(pos.y, len(prompt_string) + pos.x)
         self.windows.addstr(pos.y, len(prompt_string) + pos.x, len(prev_text) * " ")
-        input = stdscr.getstr(pos.y, len(prompt_string) + pos.x, 50)
+        input = stdscr.getstr(pos.y, len(prompt_string) + pos.x, 100)
         stdscr.refresh()
 
         return input.decode("utf-8")
@@ -121,13 +123,14 @@ class MyConsole(Listener):
         textpad.rectangle(stdscr, box[0][0], box[0][1], box[1][0], box[1][1])
 
     def print_input_box(self, stdscr, text=""):
-        # print_box(stdscr, Position(3, 3), Size(2, int(sw / 2)))
+        sh, sw = stdscr.getmaxyx()
+        self.print_box(stdscr, Position(3, 3), Size(2, int(sw / 2)))
         text = self.my_raw_input(stdscr, Position(4, 4), "Search: ", text)
         return text
 
     def divide_window(self, windows):
         sh, sw = windows.getmaxyx()
         oy, ox = windows.getbegyx()
-        w_one = curses.newwin(sh, int(sw / 2) - 2, oy, ox)
+        w_one = curses.newwin(sh, int(sw / 2) - 2, oy, ox + 1)
         w_two = curses.newwin(sh, int(sw / 2) - 4, oy, int(sw / 2) + 2)
         return w_one, w_two
