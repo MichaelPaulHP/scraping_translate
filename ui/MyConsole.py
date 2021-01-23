@@ -100,8 +100,8 @@ class MyConsole(Listener):
     def print_state(self, state):
         self.state = state
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, 10, "                           ", curses.color_pair(1))
-        self.window_status.addstr(0, 10, self.state, curses.color_pair(1))
+        self.window_status.addstr(0, 10, "                           ")
+        self.window_status.addstr(0, 10, self.state)
         self.window_status.refresh()
 
     def print_options(self):
@@ -109,11 +109,11 @@ class MyConsole(Listener):
         keys = {"key": "q", "option": "exit"}
         self.window_status = curses.newwin(1, sw - 3, sh - 1, 1)
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, 1, (sw - 10) * " ", curses.color_pair(1))
-        self.window_status.addstr(0, sw - 20, " t:", curses.color_pair(1))
-        self.window_status.addstr(0, sw - 16, "New translation", curses.color_pair(1))
-        self.window_status.addstr(0, sw - 40, " q:", curses.color_pair(1))
-        self.window_status.addstr(0, sw - 36, "Exit", curses.color_pair(1))
+        #self.window_status.addstr(0, 1, (sw - 10) * " ", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 20, " t ", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 16, "New translation")
+        self.window_status.addstr(0, sw - 40, " q ", curses.color_pair(1))
+        self.window_status.addstr(0, sw - 36, "Exit")
         self.windows.refresh()
         self.window_status.refresh()
 
