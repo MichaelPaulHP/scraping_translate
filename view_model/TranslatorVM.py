@@ -8,11 +8,14 @@ class TranslatorVM:
     def __init__(self, listener: Listener):
         self.listener = listener
         self.google_translate = None
+        self.scrap = None
+
+    def init_scraping(self):
+        self.scrap = GoogleScraper()
+        self.scrap.listener = self.listener
 
     def do_scraping(self, text: str):
-        scrap = GoogleScraper()
-        scrap.listener = self.listener
-        self.google_translate = scrap.scraping(text)
+        self.google_translate = self.scrap.scraping(text)
         # trans =google_translate.get_translations()
 
     def translations(self):

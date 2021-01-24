@@ -28,8 +28,9 @@ class MyConsole(Listener):
         self.sh, self.sw = stdscr.getmaxyx()
         self.start_color()
         self.print_options()
+        self.print_state(state="Starting ...")
+        self.vm.init_scraping()
         self.print_state(state="Ready")
-
         text = self.print_input_box(stdscr)
         self.create_win_result(stdscr)
         self.print_state(state="Loading")

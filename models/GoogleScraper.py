@@ -14,21 +14,24 @@ from selenium.common.exceptions import TimeoutException
 class GoogleScraper:
     listener: Listener = None
 
+    def __init__(self):
+        self.browser = webdriver.PhantomJS()
+
     def scraping(self, text: str) -> GoogleTranslate:
 
         url = "https://translate.google.com/?sl=en&tl=es&op=translate&text=" + text
-        browser = webdriver.PhantomJS()
+
         self.listener.on_message("I am scraping")
-        browser.get(url)
-        delay = 2  # seconds
+        self.browser.get(url)
+        delay = 3  # seconds
         try:
-            myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'Dwvecf')))
+            myElem = WebDriverWait(self.browser, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'Dwvecf')))
             self.listener.on_message("Page is ready")
 
         except TimeoutException:
             self.listener.on_error("Loading took too much time!")
 
-        html = browser.page_source
+        html = self.browser.page_source
         soup = BeautifulSoup(html)
 
         a = soup.find_all('div', class_="Dwvecf")
