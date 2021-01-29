@@ -10,6 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
+from models.options.OptionTranslate import OptionTranslate
+
 
 class GoogleScraper:
     listener: Listener = None
@@ -17,9 +19,9 @@ class GoogleScraper:
     def __init__(self):
         self.browser = webdriver.PhantomJS()
 
-    def scraping(self, text: str) -> GoogleTranslate:
+    def scraping(self, opt: OptionTranslate) -> GoogleTranslate:
 
-        url = "https://translate.google.com/?sl=en&tl=es&op=translate&text=" + text
+        url = opt.get_url()
 
         self.listener.on_message("I am scraping")
         self.browser.get(url)
