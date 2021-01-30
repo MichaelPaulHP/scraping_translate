@@ -19,6 +19,7 @@ class MyConsole(Listener):
         self.sh = 0
         self.sw = 0
         self.prev_text = " "
+        self.isEnToEs = True
 
     def show_main(self, stdscr):
         self.windows = stdscr
@@ -39,7 +40,10 @@ class MyConsole(Listener):
                 if self.is_valid_text(text):
                     # self.print_state(state="I find " + text[:10])
                     self.clear_results()
-                    self.vm.do_scraping(text)
+                    if self.isEnToEs:
+                        self.vm.do_scraping_eng_es(text)
+                    else:
+                        self.vm.do_scraping_es_eng(text)
                     translate_printer = GoogleTranslatePrinter(self.vm)
 
                     translate_printer.print_principal_result(self.windows)
@@ -61,9 +65,27 @@ class MyConsole(Listener):
                     curses.flushinp()
                     curses.curs_set(1)
                     text = self.print_input_box(stdscr, text)
+                if key == ord('e'):
+                    self.change_option()
 
             except curses.error:
                 pass
+
+    def change_option(self):
+        if self.isEnToEs:
+            self.print_option_es_en()
+            self.isEnToEs = False
+        else:
+            self.print_option_en_es()
+            self.isEnToEs = True
+
+    def print_option_language(self):
+        sh, sw = self.window_status.getmaxyx()
+        self.window_status.addstr(0, sw - 60, " e ", curses.color_pair(1))
+        if self.isEnToEs:
+            self.print_option_en_es()
+        else:
+            self.print_option_es_en()
 
     def on_message(self, message: str):
         self.print_state(message)
@@ -110,11 +132,12 @@ class MyConsole(Listener):
         keys = {"key": "q", "option": "exit"}
         self.window_status = curses.newwin(1, sw - 3, sh - 1, 1)
         sh, sw = self.window_status.getmaxyx()
-        #self.window_status.addstr(0, 1, (sw - 10) * " ", curses.color_pair(1))
+        # self.window_status.addstr(0, 1, (sw - 10) * " ", curses.color_pair(1))
         self.window_status.addstr(0, sw - 20, " t ", curses.color_pair(1))
         self.window_status.addstr(0, sw - 16, "New translation")
         self.window_status.addstr(0, sw - 40, " q ", curses.color_pair(1))
         self.window_status.addstr(0, sw - 36, "Exit")
+        self.print_option_language()
         self.windows.refresh()
         self.window_status.refresh()
 
@@ -145,3 +168,13 @@ class MyConsole(Listener):
         w_one = curses.newwin(sh, int(sw / 2) - 2, oy, ox + 1)
         w_two = curses.newwin(sh, int(sw / 2) - 4, oy, int(sw / 2) + 2)
         return w_one, w_two
+
+    def print_option_en_es(self):
+        sh, sw = self.window_status.getmaxyx()
+        self.window_status.addstr(0, sw - 56, "en -> es")
+        self.windows.refresh()
+
+    def print_option_es_en(self):
+        sh, sw = self.window_status.getmaxyx()
+        self.window_status.addstr(0, sw - 56, "es -> en")
+        self.windows.refresh()
