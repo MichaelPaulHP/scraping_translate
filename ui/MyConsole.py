@@ -171,10 +171,10 @@ class MyConsole(Listener):
 
     def print_option_en_es(self):
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, sw - 56, "en -> es")
+        self.window_status.addstr(0, sw - 56, "En -> Es")
         self.windows.refresh()
 
     def print_option_es_en(self):
         sh, sw = self.window_status.getmaxyx()
-        self.window_status.addstr(0, sw - 56, "es -> en")
+        self.window_status.addstr(0, sw - 56, "Es -> En")
         self.windows.refresh()
